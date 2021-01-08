@@ -2,7 +2,7 @@
 
 ## Run
 
-`npm start
+`npm start`
 
 ## Test
 
