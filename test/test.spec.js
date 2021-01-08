@@ -1,5 +1,5 @@
-const { getDeck, shuffle, draw, playOneRound } = require('./src/actions');
-const utils = require('./test/utils.js');
+const { getDeck, shuffle, draw, playOneRound } = require('../src/actions');
+const utils = require('./utils.js');
 const assert = require('assert');
 
 const deck = getDeck();

@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "node game.js",
-    "test": "node test.spec.js"
+    "start": "node src/game.js",
+    "test": "node test/test.spec.js"
   },
   "author": "Long Nguyen",
   "license": "MIT"
