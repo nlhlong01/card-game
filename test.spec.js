@@ -4,10 +4,16 @@ const assert = require('assert');
 
 const deck = getDeck();
 
+/**
+ * Test #getDeck()
+ */
 const testGetDeck = () => {
   assert(utils.isValidDeck(deck), 'The initiated deck should be a valid deck');
 };
 
+/**
+ * Test #shuffle()
+ */
 const testShuffle = () => {
   const shuffledDeck = shuffle(deck);
   assert(
@@ -32,6 +38,9 @@ const testShuffle = () => {
   );
 };
 
+/**
+ * Test #draw()
+ */
 const testDraw = () => {
   const player = {
     name: 'John Doe',
@@ -56,6 +65,9 @@ const testDraw = () => {
   );
 };
 
+/**
+ * Test #playOneRound()
+ */
 const testPlayOneRound = () => {
   const harry = { name: 'Harry', drawPile: [5], discardPile: [] };
   const ron = { name: 'Ron', drawPile: [2], discardPile: [] };
@@ -66,8 +78,9 @@ const testPlayOneRound = () => {
 
   const albus = { name: 'Albus', drawPile: [5, 7], discardPile: [] };
   const severus = { name: 'Severus', drawPile: [2, 7], discardPile: [] };
+  const winner = playOneRound(albus, severus, false);
   assert(
-    playOneRound(albus, severus, false) === true &&
+    winner === true &&
     albus.discardPile.length === 4 &&
     severus.discardPile.length === 0,
     'When comparing two cards of the same value, the winner of the next round' +

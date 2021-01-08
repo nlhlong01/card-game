@@ -71,6 +71,9 @@ const draw = (player, printLogs) => {
 
 /**
  * Play until one player wins the round.
+ * @param {Object} player1 First player participating in the round.
+ * @param {Object} player2 Second player participating in the round.
+ * @param {boolean} printLogs True if you want to print the logs.
  * @returns {boolean} True if Player 1 wins the round.
  */
 const playOneRound = (player1, player2, printLogs) => {
