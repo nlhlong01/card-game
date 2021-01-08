@@ -2,12 +2,10 @@
   "name": "sap-challenge",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "node game.js",
     "test": "node test.spec.js"
   },
   "author": "Long Nguyen",
-  "license": "MIT",
-  "devDependencies": {}
+  "license": "MIT"
 }

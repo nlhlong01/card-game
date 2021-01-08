@@ -1,4 +1,4 @@
-const { getDeck, shuffle, draw } = require('./actions');
+const { getDeck, shuffle, draw, playOneRound } = require('./actions');
 const utils = require('./utils.js');
 const assert = require('assert');
 
@@ -40,7 +40,7 @@ const testDraw = () => {
   };
 
   // Attempt to draw a card.
-  const drawnCard = draw(player);
+  const drawnCard = draw(player, false);
 
   assert(
     player.discardPile.length === 0,
@@ -56,6 +56,26 @@ const testDraw = () => {
   );
 };
 
+const testPlayOneRound = () => {
+  const harry = { name: 'Harry', drawPile: [5], discardPile: [] };
+  const ron = { name: 'Ron', drawPile: [2], discardPile: [] };
+  assert(
+    playOneRound(harry, ron) === true,
+    'The player with a higher card should win'
+  );
+
+  const albus = { name: 'Albus', drawPile: [5, 7], discardPile: [] };
+  const severus = { name: 'Severus', drawPile: [2, 7], discardPile: [] };
+  assert(
+    playOneRound(albus, severus, false) === true &&
+    albus.discardPile.length === 4 &&
+    severus.discardPile.length === 0,
+    'When comparing two cards of the same value, the winner of the next round' +
+    'should win 4 cards'
+  );
+};
+
 testGetDeck();
 testShuffle();
 testDraw();
+testPlayOneRound();
