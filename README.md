@@ -1,4 +1,4 @@
-# SAP Development Challenge
+# Challenge
 
 ## Run
 
