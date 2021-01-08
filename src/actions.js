@@ -40,8 +40,8 @@ const shuffle = (deck) => {
 /**
  * Count the total remaining cards a player has.
  */
-const countCards = (player) => {
-  return player.drawPile.length + player.discardPile.length;
+const count = (player) => {
+  return (player.drawPile.length + player.discardPile.length);
 };
 
 /**
@@ -52,27 +52,27 @@ const countCards = (player) => {
  */
 const draw = (player, printLogs) => {
   // Get the card count before the player draws. 
-  const nCards = countCards(player);
+  const nCards = count(player);
 
   // If there are no more cards in the draw pile, shuffle the discard pile and
   // use those cards as the new draw pile.
   if (player.drawPile.length === 0) {
     // If both card piles are empty, return 0.
     if (player.discardPile.length === 0) return 0;
-    if (printLogs) console.log(`Renewing ${player.name}'s draw pile...`)
+
+    if (printLogs) console.log(`Renewing ${player.name}'s draw pile...`);
     player.drawPile = shuffle(player.discardPile);
     player.discardPile = [];
   }
 
-  const drawnCard = player.drawPile.pop();
-  if (printLogs) console.log(`${player.name} (${nCards}): ${drawnCard}`);
-  return drawnCard;
+  const card = player.drawPile.pop();
+  if (printLogs) console.log(`${player.name} (${nCards}): ${card}`);
+
+  return card;
 };
 
 /**
  * Play until one player wins the round.
- * @param {Object} player1 First player participating in the round.
- * @param {Object} player2 Second player participating in the round.
  * @param {boolean} printLogs True if you want to print the logs.
  * @returns {boolean} True if Player 1 wins the round.
  */
@@ -80,10 +80,11 @@ const playOneRound = (player1, player2, printLogs) => {
   let card1 = 0;
   let card2 = 0;
   let wonCards = [];
+
   // Both players keep drawing a new card until they draw different cards.
   while (card1 === card2) {
     card1 = draw(player1, printLogs);
-    // If the player has no card left, they lose the round (and the game).
+    // If the player has no card to draw, they lose the round (and the game).
     if (card1 === 0) return false;
 
     card2 = draw(player2, printLogs);
@@ -95,16 +96,15 @@ const playOneRound = (player1, player2, printLogs) => {
   if (card1 > card2) {
     player1.discardPile.push(...wonCards);
     return true;
-  } else {
-    player2.discardPile.push(...wonCards);
-    return false;
   }
+  player2.discardPile.push(...wonCards);
+  return false;
 };
 
 module.exports = {
   getDeck, 
   shuffle,
-  countCards,
+  count,
   draw,
   playOneRound
 };

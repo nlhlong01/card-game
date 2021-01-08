@@ -1,94 +1,151 @@
-const { getDeck, shuffle, draw, playOneRound } = require('../src/actions');
-const utils = require('./utils.js');
+const {
+  getDeck,
+  shuffle,
+  count,
+  draw,
+  playOneRound
+} = require('../src/actions');
 const assert = require('assert');
 
-const deck = getDeck();
-
 /**
- * Test #getDeck()
+ * Check if 2 arrays are identical.
  */
-const testGetDeck = () => {
-  assert(utils.isValidDeck(deck), 'The initiated deck should be a valid deck');
-};
+const isEqual = (arr1, arr2) => ( 
+  arr1.length === arr2.length &&
+  arr1.every((val, idx) => val === arr2[idx])
+);
 
-/**
- * Test #shuffle()
- */
-const testShuffle = () => {
-  const shuffledDeck = shuffle(deck);
-  assert(
-    utils.isValidDeck(shuffledDeck),
-    'The shuffled deck should be a valid deck'
-  );
+describe('Card Game', function() {
+  describe('#getDeck()', function() {
+    it('should return a sorted deck', function() {
+      assert(isEqual(
+        getDeck(),
+        [
+          1, 1, 1, 1, 2, 2, 2, 2,
+          3, 3, 3, 3, 4, 4, 4, 4,
+          5, 5, 5, 5, 6, 6, 6, 6,
+          7, 7, 7, 7, 8, 8, 8, 8,
+          9, 9, 9, 9, 10, 10, 10, 10
+        ]
+      ));
+    });
+  });
 
-  const results = [];
-  for (let i = 0; i < 100; i++) {
-    const shuffledDeck = shuffle(deck);
-    results.push(utils.isEqual(deck, shuffledDeck));
-  }
-  assert(
-    results.every(result => result === true),
-    'When shuffled 100 times, the deck should never be in the original order'
-  );
+  // Reference: http://www2.unb.ca/~owen/courses/2383-2019/tutorials/tut-permute-junit.txt
+  describe('#shuffle()', function() {
+    it(
+      'should never be in the original order after shuffled 100 times',
+      function() {
+        const N_REPS = 100;
+        const results = new Array(N_REPS);
+        let deck = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+        for (let i = 0; i < N_REPS; i++) {
+          deck = shuffle(deck);
+          results[i] = isEqual(deck, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        }
+        assert(results.every((v) => v === false));
+      }
+    );
 
-  const sortedShuffledDeck = shuffle(deck).sort((a, b) => a - b);
-  assert(
-    utils.isEqual(sortedShuffledDeck, deck),
-    'When shuffled and sorted, the deck should be in the original order'
-  );
-};
+    it(
+      'should be in the original order, after shuffled and sorted',
+      function() {
+        assert(isEqual(
+          shuffle([1, 2, 3, 4]).sort((a, b) => a - b), [1, 2, 3, 4]
+        ));
+      }
+    );
 
-/**
- * Test #draw()
- */
-const testDraw = () => {
-  const player = {
-    name: 'John Doe',
-    drawPile: [],
-    discardPile: [1, 2, 3, 4, 5]
-  };
+    it(
+      'should result [3, 1, 4, 2, 5] after shuffled for a while',
+      function(done) {
+        this.timeout(2000);
+        let deck = [1, 2, 3, 4, 5];
+        while (!isEqual(deck, [3, 1, 4, 2, 5])) {
+          deck = shuffle(deck);
+        }
+        done();
+      }
+    );
+  });
 
-  // Attempt to draw a card.
-  const drawnCard = draw(player, false);
+  describe('#count()', function() {
+    it(
+      'should return the total number of remaining cards a player has',
+      function() {
+        const player = {
+          drawPile: [1, 3, 2, 9, 7],
+          discardPile: [4, 5]
+        };
+        assert.strictEqual(count(player), 7);
+      }
+    );
+  });
 
-  assert(
-    player.discardPile.length === 0,
-    'The discard pile should be empty'
-  );
+  describe('#draw()', function() {
+    it('should draw a card from the draw pile', function() {
+      const player = {
+        drawPile: [1, 2, 3, 4, 5],
+        discardPile: [7, 6]
+      };
+      assert.strictEqual(draw(player, false), 5);
+      assert(isEqual(player.drawPile, [1, 2, 3, 4]));
+      assert(isEqual(player.discardPile, [7, 6]));
+    });
 
-  const drawPile = player.drawPile
-    .concat([drawnCard])
-    .sort((a, b) => a - b);
-  assert(
-    utils.isEqual(drawPile, [1, 2, 3, 4, 5]),
-    'The draw pile should be a shuffled version of the original discard pile'
-  );
-};
+    describe('When the player attempts to draw from an empty pile', function () {
+      it('should shuffle the discard pile into the draw pile', function() {
+        const player = {
+          name: 'John Doe',
+          drawPile: [],
+          discardPile: [1, 2, 3, 4, 5]
+        };
+        const card = draw(player, false);
+        assert.strictEqual(player.discardPile.length, 0);
+        // Put the card back to draw pile after drawing.
+        player.drawPile.push(card);
+        assert(!isEqual(player.drawPile, [1, 2, 3, 4, 5]));
+        player.drawPile = player.drawPile.sort((a, b) => a - b);
+        assert(isEqual(player.drawPile, [1, 2, 3, 4, 5]));
+      });
 
-/**
- * Test #playOneRound()
- */
-const testPlayOneRound = () => {
-  const harry = { name: 'Harry', drawPile: [5], discardPile: [] };
-  const ron = { name: 'Ron', drawPile: [2], discardPile: [] };
-  assert(
-    playOneRound(harry, ron) === true,
-    'The player with a higher card should win'
-  );
+      it('should return 0 if the discard pile is also empty', function() {
+        player = { name: 'John Doe', drawPile: [], discardPile: [] };
+        assert.strictEqual(draw(player,), 0);
+      });
+    });
+  });
 
-  const albus = { name: 'Albus', drawPile: [5, 7], discardPile: [] };
-  const severus = { name: 'Severus', drawPile: [2, 7], discardPile: [] };
-  const winner = playOneRound(albus, severus, false);
-  assert(
-    winner === true &&
-    albus.discardPile.length === 4 &&
-    severus.discardPile.length === 0,
-    'When comparing two cards of the same value, the winner of the next round' +
-    'should win 4 cards'
-  );
-};
+  describe('#playOneRound()', function() {
+    it('should let the player with a higher card win', function() {
+      const winner = { name: 'Harry', drawPile: [5], discardPile: [] };
+      const loser = { name: 'Draco', drawPile: [2], discardPile: [] };
+      assert(playOneRound(winner, loser, false));
+      assert(isEqual(winner.discardPile, [5, 2]));
+      assert(isEqual(loser.discardPile, []));
+    });
 
-testGetDeck();
-testShuffle();
-testDraw();
-testPlayOneRound();
+    it(
+      'should let the player with a higher card win 4 cards after an even turn',
+      function() {
+        const winner = { name: 'Severus', drawPile: [5, 7], discardPile: [] };
+        const loser = { name: 'Voldemort', drawPile: [2, 7], discardPile: [] };
+        assert(playOneRound(winner, loser, false));
+        assert(isEqual(winner.discardPile, [7, 7, 5, 2]));
+        assert(isEqual(loser.discardPile, []));
+      }
+    );
+
+    it(
+      'should let the player with both empty piles lose even if the last turn was even',
+      function() {
+        const winner = {
+          name: 'Sirius',
+          drawPile: [5],
+          discardPile: [1, 2, 3, 4, 5, 6, 7]
+        };
+        const loser = { name: 'Dementor', drawPile: [5], discardPile: [] };
+        assert(playOneRound(winner, loser, false));
+      });
+  });
+});
