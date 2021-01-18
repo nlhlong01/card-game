@@ -1,4 +1,4 @@
-# SAP Challenge
+# A Weird Card Game
 
 ## Prerequisites
 
